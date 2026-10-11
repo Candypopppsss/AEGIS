@@ -49,7 +49,7 @@ try {
   if (before.capacity !== 96) throw new Error('The deployed event score is incorrect.');
 
   compose('restart', '--no-deps', 'api');
-  compose('up', '-d', '--wait', '--wait-timeout', '120');
+  compose('up', '-d', '--no-recreate', '--wait', '--wait-timeout', '120');
   const after = await request('/dashboard', { token });
   if (after.capacity !== 96) throw new Error('Saved data did not survive the container restart.');
   const login = await request('/auth/login', { body: { email: account.email, password: account.password } });
