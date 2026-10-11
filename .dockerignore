@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/target
+**/data
+**/.env*
+.git
+.m2
+.npm-cache
+.runtime
+font
+*.log
+*.docx

@@ -1,0 +1,32 @@
+services:
+  api:
+    environment:
+      FRONTEND_ORIGIN: https://${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN to your domain},http://localhost:8081,http://127.0.0.1:8081
+  web:
+    ports: !override
+      - "127.0.0.1:8081:80"
+  gateway:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Set PUBLIC_DOMAIN to your domain}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  caddy-data:
+  caddy-config:

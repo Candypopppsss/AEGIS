@@ -1,0 +1,22 @@
+{
+  "name": "aegis",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/api.test.mjs tests/ui.test.mjs",
+    "test:live": "node --test tests/live.test.mjs"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "vite": "7.3.1",
+    "playwright": "1.63.0"
+  }
+}
