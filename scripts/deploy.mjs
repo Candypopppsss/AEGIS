@@ -9,7 +9,9 @@ if (existsSync(join(cwd, '.env'))) process.loadEnvFile(join(cwd, '.env'));
 const baseUrl = (process.env.DEPLOY_URL || `http://127.0.0.1:${process.env.WEB_PORT || 8081}`).replace(/\/$/, '');
 const docker = (...args) => execFileSync('docker', args, { cwd, stdio: 'inherit' });
 const compose = (...args) => docker('compose',
-  ...(process.env.PUBLIC_DOMAIN ? ['-f', 'compose.yaml', '-f', 'compose.public.yaml'] : []),
+  ...(process.env.TUNNEL_ENABLED === 'true'
+    ? ['-f', 'compose.yaml', '-f', 'compose.tunnel.yaml']
+    : process.env.PUBLIC_DOMAIN ? ['-f', 'compose.yaml', '-f', 'compose.public.yaml'] : []),
   ...args);
 
 async function request(path, { body, token } = {}) {

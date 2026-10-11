@@ -74,6 +74,18 @@ GitHub Actions runs the Docker, browser, API, and Spring checks on pushes to `ma
 
 ## Public HTTPS
 
+For a temporary public link on a phone hotspot, run:
+
+```sh
+npm run publish:public
+```
+
+This runs Cloudflare's tunnel connector in Docker, keeps the HTTP listener on loopback, configures the exact HTTPS origin, and verifies the public app in Chromium and after an API restart. The verified URL is saved in `.runtime/public-url.txt`. Authentication limits use the visitor address supplied by Cloudflare.
+
+Keep the computer, Docker, and internet connection running. Quick Tunnel addresses change after the tunnel restarts; rerun the command to update the configuration and obtain the new link. Quick Tunnels have no uptime guarantee and are intended for temporary access. A permanent address requires a named tunnel or a reachable server with a domain.
+
+For manual Compose commands in tunnel mode, use `docker compose -f compose.yaml -f compose.tunnel.yaml`. Use one public mode at a time; remove `TUNNEL_ENABLED` and `DEPLOY_URL` from `.env` before switching to the direct domain setup below.
+
 A direct public deployment requires a domain pointing to an internet-reachable Docker host and inbound TCP ports 80 and 443. A phone hotspot may require an outbound tunnel or a different network because carrier NAT prevents direct inbound access.
 
 Add the following to an untracked `.env` file:
