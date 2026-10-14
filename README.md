@@ -5,6 +5,16 @@
 Track digital activities, review their estimated cost, and schedule focus time.
 Built with React, Node.js, and Turso. Hosted on Vercel.
 
+## Repository
+
+| Folder | Contents |
+| --- | --- |
+| `frontend/` | React pages, styles, and browser tests |
+| `backend/` | Node.js API, database client, API tests, and Dockerfile |
+| `api/` | Vercel entry point that loads the backend |
+| `scripts/` | Build serving and deployment checks |
+| `docs/` | Development and deployment instructions |
+
 ## Features
 
 - Account creation and sign-in.

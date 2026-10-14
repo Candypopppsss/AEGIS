@@ -5,7 +5,7 @@
 Node.js 24 is required. Install dependencies in the root and `frontend`, then
 run `npm run start:api` and `npm run start:web` in separate terminals.
 The frontend listens on port 5173 and proxies API requests to port 8080.
-SQLite data and the signing key are stored in ignored `local-api/data/`.
+SQLite data and the signing key are stored in ignored `backend/data/`.
 
 To serve the compiled app:
 

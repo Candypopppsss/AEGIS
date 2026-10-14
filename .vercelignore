@@ -5,9 +5,9 @@
 !vercel.json
 !api
 !api/index.mjs
-!local-api
-!local-api/server.mjs
-!local-api/cloud-storage.mjs
+!backend
+!backend/server.mjs
+!backend/cloud-storage.mjs
 !frontend
 !frontend/package.json
 !frontend/package-lock.json

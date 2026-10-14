@@ -31,7 +31,6 @@ id_ed25519*
 backend/data/
 .m2/
 .npm-cache/
-local-api/data/
 .runtime/
 .vercel/
 /font/

@@ -3,12 +3,12 @@ import { mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createApi } from '../local-api/server.mjs';
+import { createApi } from '../backend/server.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const webRoot = await realpath(resolve(root, 'frontend/dist'));
 await stat(resolve(webRoot, 'index.html'));
-const database = resolve(process.env.DATABASE_PATH || resolve(root, 'local-api/data/firewall.sqlite'));
+const database = resolve(process.env.DATABASE_PATH || resolve(root, 'backend/data/firewall.sqlite'));
 await mkdir(dirname(database), { recursive: true });
 const keyPath = resolve(dirname(database), 'session.key');
 try { await writeFile(keyPath, randomBytes(32), { flag: 'wx', mode: 0o600 }); }

@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: local-api/Dockerfile
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:8081,http://127.0.0.1:8081}

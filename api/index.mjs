@@ -1,5 +1,5 @@
-import { createApi } from '../local-api/server.mjs';
-import { createCloudStorage } from '../local-api/cloud-storage.mjs';
+import { createApi } from '../backend/server.mjs';
+import { createCloudStorage } from '../backend/cloud-storage.mjs';
 
 let handler;
 export default async function api(request, response) {
