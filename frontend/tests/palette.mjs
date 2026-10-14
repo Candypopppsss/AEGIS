@@ -10,6 +10,6 @@ export async function assertMonochrome(page) {
     });
   }));
   assert.deepEqual(colored, [], 'The website must use black and white only.');
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).color), 'rgb(0, 0, 0)');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(0, 0, 0)');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).color), 'rgb(255, 255, 255)');
 }

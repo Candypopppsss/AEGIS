@@ -1,10 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { request } from './api.js';
 
 export default function Auth({ onLogin, message, onBack }) {
   const [register, setRegister] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const background = useRef(null);
+
+  useEffect(() => {
+    const page = background.current;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame;
+    function position(x, y) {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        page.style.setProperty('--dot-x', `${x}px`);
+        page.style.setProperty('--dot-y', `${y}px`);
+      });
+    }
+    function move(event) {
+      if (motion.matches || event.pointerType !== 'mouse') return;
+      position((event.clientX / window.innerWidth - .5) * 24,
+        (event.clientY / window.innerHeight - .5) * 24);
+    }
+    const reset = () => position(0, 0);
+    page.addEventListener('pointermove', move);
+    page.addEventListener('pointerleave', reset);
+    motion.addEventListener('change', reset);
+    return () => {
+      cancelAnimationFrame(frame);
+      page.removeEventListener('pointermove', move);
+      page.removeEventListener('pointerleave', reset);
+      motion.removeEventListener('change', reset);
+    };
+  }, []);
 
   async function submit(event) {
     event.preventDefault();
@@ -28,7 +57,7 @@ export default function Auth({ onLogin, message, onBack }) {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" ref={background}>
       {onBack && <button className="auth-back" onClick={onBack}>Back to AEGIS</button>}
       <section className="auth-card">
         <div className="brand">AEGIS</div>

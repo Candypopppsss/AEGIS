@@ -231,7 +231,7 @@ test('mobile pages have no horizontal overflow and keep navigation available', a
   }
 });
 
-test('landing navigation and account forms stay monochrome on desktop and mobile', async t => {
+test('animated landing navigation and account forms work on desktop and mobile', async t => {
   for (const width of [360, 1280]) {
     const context = await browser.newContext({ viewport: { width, height: 800 } });
     t.after(() => context.close());
@@ -239,9 +239,15 @@ test('landing navigation and account forms stay monochrome on desktop and mobile
     await page.goto(baseUrl);
     await assertMonochrome(page);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-    await page.getByRole('link', { name: 'How it works' }).click();
-    assert.equal(new URL(page.url()).hash, '#how-it-works');
-    await page.getByRole('link', { name: 'AEGIS', exact: true }).click();
+    const illustration = page.locator('.line-contours path').first();
+    const initialPath = await illustration.getAttribute('d');
+    await page.getByRole('button', { name: 'How it works', exact: true }).click();
+    await page.getByText('02 / 03', { exact: true }).waitFor();
+    assert.notEqual(await illustration.getAttribute('d'), initialPath);
+    await page.getByRole('button', { name: 'Next section' }).click();
+    await page.getByText('03 / 03', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'AEGIS', exact: true }).click();
+    await page.getByText('01 / 03', { exact: true }).waitFor();
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await assertMonochrome(page);
     await page.getByRole('button', { name: 'Create an account', exact: true }).click();
