@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import { chromium } from 'playwright';
+import { assertMonochrome } from './palette.mjs';
 
 const baseUrl = process.env.TEST_URL || 'http://127.0.0.1:5173';
 
@@ -17,7 +18,9 @@ test('live registration, login, events, zones, and saved data work together', as
   const password = 'test-password-123';
 
   await page.goto(baseUrl);
+  await assertMonochrome(page);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await assertMonochrome(page);
   await page.getByRole('button', { name: 'Create an account', exact: true }).click();
   await page.getByLabel('Full name').fill('QA Test');
   await page.getByLabel('Work or institution email').fill(email);
@@ -30,6 +33,7 @@ test('live registration, login, events, zones, and saved data work together', as
   await page.getByText('96%', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Add protect zone' }).click();
   const dialog = page.getByRole('dialog');
+  await assertMonochrome(page);
   await dialog.getByLabel('Title', { exact: true }).fill('QA Interview');
   await dialog.getByLabel('Start date and time').fill('2099-01-01T10:00');
   await dialog.getByLabel('End date and time').fill('2099-01-01T11:00');
@@ -53,17 +57,7 @@ test('live registration, login, events, zones, and saved data work together', as
   await page.reload();
   await page.getByText('96%', { exact: true }).waitFor();
 
-  const offPaletteElements = await page.evaluate(() => [...document.querySelectorAll('*')].flatMap(element => {
-    const style = getComputedStyle(element);
-    return ['color', 'backgroundColor', 'borderTopColor', 'outlineColor'].flatMap(property => {
-      const value = style[property];
-      const rgb = value.match(/^rgba?\((\d+), (\d+), (\d+)/);
-      return rgb && (Number(rgb[1]) < Number(rgb[2]) || Number(rgb[2]) < Number(rgb[3])) ? [`${element.tagName}: ${property} ${value}`] : [];
-    });
-  }));
-  assert.deepEqual(offPaletteElements, [], 'The UI must use neutral surfaces and peach text.');
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(34, 34, 34)');
-  assert.match(await page.locator('.app-header .brand').evaluate(element => getComputedStyle(element).backgroundImage), /linear-gradient/, 'AEGIS branding uses a shaded peach finish.');
+  await assertMonochrome(page);
   assert.deepEqual(errors, [], 'No uncaught browser errors.');
   await page.getByRole('button', { name: 'Sign out' }).click();
 });

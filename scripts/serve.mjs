@@ -17,9 +17,7 @@ const secret = await readFile(keyPath);
 if (secret.length !== 32) throw new Error('The session key must contain exactly 32 bytes.');
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 8081);
-// Render supplies the assigned HTTPS URL, including when the service name changes.
-process.env.FRONTEND_ORIGIN ||= process.env.RENDER_EXTERNAL_URL
-  || `http://localhost:${port},http://127.0.0.1:${port}`;
+process.env.FRONTEND_ORIGIN ||= `http://localhost:${port},http://127.0.0.1:${port}`;
 const server = createApi({ database, secret });
 const [apiHandler] = server.listeners('request');
 server.removeAllListeners('request');

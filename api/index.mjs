@@ -1,6 +1,5 @@
 import { createApi } from '../local-api/server.mjs';
 import { createCloudStorage } from '../local-api/cloud-storage.mjs';
-import { createSpringProxy } from '../local-api/spring-proxy.mjs';
 
 let handler;
 export default async function api(request, response) {
@@ -12,10 +11,6 @@ export default async function api(request, response) {
     request.url = url.pathname + url.search;
   }
   if (!handler) {
-    if (process.env.SPRING_API_URL) {
-      handler = createSpringProxy(process.env.SPRING_API_URL);
-      return handler(request, response);
-    }
     const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, SESSION_SECRET } = process.env;
     if (!TURSO_DATABASE_URL || !TURSO_AUTH_TOKEN || !SESSION_SECRET || Buffer.byteLength(SESSION_SECRET) < 32) {
       response.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

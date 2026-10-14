@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { before, after, test } from 'node:test';
 import { chromium } from 'playwright';
+import { assertMonochrome } from './palette.mjs';
 
 const baseUrl = process.env.TEST_URL || 'http://127.0.0.1:5173';
 let browser;
@@ -47,7 +48,6 @@ async function login(page) {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
-// These exercise the browser with controlled API responses, not the Spring backend.
 test('registration submits the correct fields and opens the dashboard', async t => {
   let submitted;
   const page = await open(t, { authenticated: false, handler: async (route, path) => {
@@ -226,6 +226,27 @@ test('mobile pages have no horizontal overflow and keep navigation available', a
   for (const name of ['Overview', 'Protect zones', 'Daily summary']) {
     await page.getByRole('button', { name, exact: true }).click();
     await page.getByRole('heading', { name, exact: true, level: 1 }).waitFor();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await assertMonochrome(page);
+  }
+});
+
+test('landing navigation and account forms stay monochrome on desktop and mobile', async t => {
+  for (const width of [360, 1280]) {
+    const context = await browser.newContext({ viewport: { width, height: 800 } });
+    t.after(() => context.close());
+    const page = await context.newPage();
+    await page.goto(baseUrl);
+    await assertMonochrome(page);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.getByRole('link', { name: 'How it works' }).click();
+    assert.equal(new URL(page.url()).hash, '#how-it-works');
+    await page.getByRole('link', { name: 'AEGIS', exact: true }).click();
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await assertMonochrome(page);
+    await page.getByRole('button', { name: 'Create an account', exact: true }).click();
+    await page.getByLabel('Full name').waitFor();
+    await assertMonochrome(page);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   }
 });

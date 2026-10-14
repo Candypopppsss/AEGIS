@@ -8,7 +8,6 @@
 !local-api
 !local-api/server.mjs
 !local-api/cloud-storage.mjs
-!local-api/spring-proxy.mjs
 !frontend
 !frontend/package.json
 !frontend/package-lock.json

@@ -6,13 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const cwd = fileURLToPath(new URL('..', import.meta.url));
 if (existsSync(join(cwd, '.env'))) process.loadEnvFile(join(cwd, '.env'));
-const baseUrl = (process.env.DEPLOY_URL || `http://127.0.0.1:${process.env.WEB_PORT || 8081}`).replace(/\/$/, '');
+const baseUrl = `http://127.0.0.1:${process.env.WEB_PORT || 8081}`;
 const docker = (...args) => execFileSync('docker', args, { cwd, stdio: 'inherit' });
-const compose = (...args) => docker('compose',
-  ...(process.env.TUNNEL_ENABLED === 'true'
-    ? ['-f', 'compose.yaml', '-f', 'compose.tunnel.yaml']
-    : process.env.PUBLIC_DOMAIN ? ['-f', 'compose.yaml', '-f', 'compose.public.yaml'] : []),
-  ...args);
+const compose = (...args) => docker('compose', ...args);
 
 async function request(path, { body, token } = {}) {
   const response = await fetch(`${baseUrl}/api${path}`, {
@@ -32,7 +28,7 @@ async function request(path, { body, token } = {}) {
 try {
   try { docker('info', '--format', '{{.ServerVersion}}'); }
   catch {
-    throw new Error('Docker engine is unavailable. Start Docker Desktop or run node scripts/start-docker.mjs.');
+    throw new Error('Docker engine is unavailable. Start Docker Desktop.');
   }
   compose('config', '--quiet');
   compose('up', '-d', '--build', '--wait', '--wait-timeout', '120');
@@ -59,9 +55,6 @@ try {
 
   compose('ps');
   console.log(`Deployment verified: ${baseUrl}`);
-  if (process.env.PUBLIC_DOMAIN && baseUrl !== `https://${process.env.PUBLIC_DOMAIN}`) {
-    console.log(`HTTPS gateway configured for https://${process.env.PUBLIC_DOMAIN}; public reachability and certificate issuance were not verified by these local checks.`);
-  }
 } catch (error) {
   console.error(`Deployment not verified: ${error.message}`);
   process.exitCode = 1;
