@@ -1,9 +1,21 @@
 import { createApi } from '../local-api/server.mjs';
 import { createCloudStorage } from '../local-api/cloud-storage.mjs';
+import { createSpringProxy } from '../local-api/spring-proxy.mjs';
 
 let handler;
 export default async function api(request, response) {
+  const url = new URL(request.url, 'http://localhost');
+  const route = url.searchParams.get('route') || request.query?.route;
+  if (route) {
+    url.pathname = `/api/${Array.isArray(route) ? route.join('/') : route}`;
+    url.searchParams.delete('route');
+    request.url = url.pathname + url.search;
+  }
   if (!handler) {
+    if (process.env.SPRING_API_URL) {
+      handler = createSpringProxy(process.env.SPRING_API_URL);
+      return handler(request, response);
+    }
     const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, SESSION_SECRET } = process.env;
     if (!TURSO_DATABASE_URL || !TURSO_AUTH_TOKEN || !SESSION_SECRET || Buffer.byteLength(SESSION_SECRET) < 32) {
       response.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -17,13 +29,6 @@ export default async function api(request, response) {
       secret: Buffer.from(SESSION_SECRET), allowedOrigins,
     });
     [handler] = server.listeners('request');
-  }
-  const url = new URL(request.url, 'http://localhost');
-  const route = url.searchParams.get('route') || request.query?.route;
-  if (route) {
-    url.pathname = `/api/${Array.isArray(route) ? route.join('/') : route}`;
-    url.searchParams.delete('route');
-    request.url = url.pathname + url.search;
   }
   return handler(request, response);
 }

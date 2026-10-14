@@ -4,9 +4,9 @@ Small digital decisions add up. AEGIS helps students and professionals see the l
 
 **[Open AEGIS](https://aegis-ten-topaz.vercel.app)** — use it in your browser; no download needed.
 
-The frontend is publicly hosted on Vercel and works independently of the development computer. Database setup is pending: registration, sign-in, and saved activity require the free Turso database to be connected before the complete app is available. The previous temporary Cloudflare Tunnel address has expired.
+The app is publicly hosted on Vercel with a connected persistent Turso database and works independently of the development computer. Account creation, sign-in, activity logging, protect zones, and daily summaries are available at the link above.
 
-A free-tier Vercel configuration with a Turso database is included in [`vercel.json`](vercel.json). See the [Vercel setup](docs/development.md#vercel-with-a-free-persistent-database). The production homepage is deployed; full API verification is pending database connection.
+A free-tier Vercel configuration with a Turso database is included in [`vercel.json`](vercel.json). See the [Vercel setup](docs/development.md#vercel-with-a-free-persistent-database). Production browser and API checks passed on October 14, 2026, including signup, sign-in, all activity types, zones, and saved data after reload and redeployment. Accounts, sessions, activity, battery totals, and scheduled zones survived a fresh production deployment.
 
 ## Using it day to day
 
@@ -22,11 +22,11 @@ Activities are logged manually. Protect zones affect the app's records; they do 
 
 | Part | Technology |
 | --- | --- |
-| Frontend | React 19.2.8, React DOM, JavaScript/JSX, HTML, CSS, Vite 7.3.1 |
+| Frontend | React 19.2.8, React DOM, JavaScript/JSX, HTML, CSS, Vite 7.3.7 |
 | Browser integration | Fetch API for REST/JSON requests; sessionStorage for the session token |
 | Primary API | Node.js 24, built-in HTTP server, JavaScript ES modules |
 | Local storage | SQLite through Node's built-in `node:sqlite` module |
-| Cloud storage | Turso/libSQL through `@libsql/client` 0.18.0; connection pending |
+| Cloud storage | Connected Turso/libSQL database in Mumbai through `@libsql/client` 0.18.0 |
 | Node authentication | scrypt password hashing with random salts; HS256 JWTs with eight-hour expiry; Node crypto |
 | Public hosting | Vercel static hosting for the frontend and Node serverless functions for the API |
 | Local/container hosting | Docker, Docker Compose, Node 24 Alpine, Nginx 1.28; Caddy 2 for optional HTTPS; Cloudflare Tunnel for temporary sharing |
@@ -34,6 +34,11 @@ Activities are logged manually. Protect zones affect the app's records; they do 
 | Build and delivery | npm and package lockfiles, Git, GitHub, GitHub Actions |
 
 The repository also includes an **alternative Java backend** in `backend/`: Java 17, Spring Boot 3.5.7, Spring Web/MVC, Spring Data JPA/Hibernate, Bean Validation, Spring Security with its OAuth2 Resource Server/JWT support, BCrypt password hashing, PostgreSQL (PostgreSQL 17 in Compose), H2 for development/tests, Maven, JUnit 5, and Spring Boot Test/MockMvc. This backend is not used by the Vercel deployment.
+
+The Spring backend now also supports **Aiven MySQL** through the `mysql` profile.
+Set Vercel's `SPRING_API_URL` to a hosted Spring backend to route the existing
+frontend through it. This requires an Aiven database and a separate HTTPS backend
+host; see the [Spring + Aiven setup](docs/development.md#spring-boot-with-aiven-mysql).
 
 An optional Render hosting configuration is included in `render.yaml`; it requires a paid hosting account and is not deployed.
 

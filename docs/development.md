@@ -52,6 +52,11 @@ With the frontend running, use `npm run test:ui`. With both services running, us
 
 ### Vercel with a free persistent database
 
+The production app is [AEGIS](https://aegis-ten-topaz.vercel.app). Its free
+`aegis-db` Turso resource in Mumbai is connected to Vercel, and production has
+`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, and `SESSION_SECRET` configured.
+No local server needs to stay running.
+
 The root `vercel.json` deploys the React build and `api/index.mjs` as one public app. The API uses Turso remotely; Vercel's temporary filesystem is never used for accounts or session keys. Local development and Docker continue to use local SQLite.
 
 1. Sign in with `vercel login` and link this repository's root directory to a project on your **Hobby** account with `vercel link`. Keep the framework preset **Other** and the root directory at the repository root; `vercel.json` supplies the build settings.
@@ -63,6 +68,57 @@ The root `vercel.json` deploys the React build and `api/index.mjs` as one public
 Vercel's assigned production and deployment URLs are allowed automatically. For a custom domain, add its exact HTTPS origin to `FRONTEND_ORIGIN` in the project's environment settings and redeploy. Due notification batches are released on the next dashboard/event request instead of relying on a background process. No local server or Docker container needs to stay on.
 
 The free plans have usage limits; review [Vercel Hobby](https://vercel.com/docs/plans/hobby) and [Turso pricing](https://turso.tech/pricing). Use the free tiers without paid upgrades. The Vercel upload allowlist excludes local databases, environment files, caches, and unrelated documents. A deployment is not verified until it returns a production URL and the public checks pass.
+
+For production verification, run the browser check with
+`TEST_URL=https://aegis-ten-topaz.vercel.app npm --prefix frontend run test:live`.
+Use `node scripts/test-production.mjs create` before a redeployment, then
+`node scripts/test-production.mjs verify` afterward to check saved accounts,
+sessions, activity, battery, and zones. These commands create QA accounts;
+their credentials stay in ignored `.runtime/production-verification.json`.
+Run the two phases on the same UTC day because the test account's battery resets
+at midnight. `TEST_URL` can select a different public HTTPS deployment.
+
+### Spring Boot with Aiven MySQL
+
+The Spring backend supports MySQL using `SPRING_PROFILES_ACTIVE=mysql`.
+Vercel keeps serving the frontend and forwards `/api/*` to the separately hosted
+Spring backend when `SPRING_API_URL` is set. Spring owns authentication and stores
+accounts, activities, batteries, and zones in Aiven. No Turso credentials are
+needed in this mode. Spring Boot is the API framework; Aiven MySQL is the database.
+
+1. Create or select an Aiven MySQL service in [Aiven Console](https://console.aiven.io).
+   Copy its host, port, database, username, and password from Connection information.
+   Download its CA certificate. See [Aiven's Java connection guide](https://aiven.io/docs/products/mysql/howto/connect-with-java).
+2. Import the CA into a dedicated truststore (run in a private directory outside Git):
+
+   ```sh
+   keytool -importcert -alias aiven-ca -file ca.pem -keystore aiven-truststore.p12 -storetype PKCS12
+   ```
+
+   Enter a truststore password when prompted. Mount this file into the backend host
+   as a readable secret, for example `/app/secrets/aiven-truststore.p12`.
+   The MySQL profile verifies the server certificate and hostname using
+   [Connector/J's VERIFY_IDENTITY mode](https://dev.mysql.com/doc/connector-j/en/connector-j-server-authentication.html).
+3. Configure the backend host using [`.env.spring.example`](../.env.spring.example):
+   `DB_URL=jdbc:mysql://HOST:PORT/DATABASE`, `DB_USER`, `DB_PASSWORD`,
+   `DB_TRUSTSTORE_URL`, `DB_TRUSTSTORE_PASSWORD`, `JWT_SECRET`, and
+   `FRONTEND_ORIGIN=https://aegis-ten-topaz.vercel.app`. Set
+   `SPRING_PROFILES_ACTIVE=mysql`. Keep secrets in the host environment, never frontend variables.
+4. Build the backend with `mvn -f backend/pom.xml package`, then run
+   `java -jar backend/target/backend-0.1.0.jar`, or use `backend/Dockerfile`
+   with the repository root as its Docker build context. The host supplies `PORT`
+   (default 8080). It must provide a public HTTPS address independent of your computer.
+5. Verify the backend `/api/health`. Set **production** `SPRING_API_URL` in Vercel
+   to the backend origin, such as `https://your-spring-host.example` (no `/api` suffix).
+   Redeploy from the repository root with `vercel --prod`.
+6. On the Vercel URL, verify signup, sign-in, events, and zones. Restart Spring
+   and verify the same account and activity still work. `npm run test:cloud`
+   covers the Vercel forwarding path; `mvn -f backend/pom.xml test` covers
+   the Spring API against H2, not a live Aiven service.
+
+Setting only `SPRING_API_URL` does not create or host the backend. This route is
+ready in source but requires an Aiven service and a running HTTPS Spring host.
+Existing SQLite/Turso accounts are not migrated automatically.
 
 ### Cloud hosting independent of your computer
 
