@@ -123,15 +123,15 @@ export default function Landing({ onSignIn }) {
             <section className="landing-slide landing-intro" data-index="0" aria-labelledby="intro-title">
               <div className="slide-content">
                 <p className="eyebrow">Decision load and protected time</p>
-                <h1 id="intro-title">Make room for decisions that matter.</h1>
-                <p className="intro-description">See your decision load. Set aside protected time. Give important work your attention.</p>
+                <h1 id="intro-title">Track your daily decision load.</h1>
+                <p className="intro-description">Log digital activities, review their estimated cost, and schedule time for focused work.</p>
                 <div className="hero-actions"><button className="primary" onClick={onSignIn}>Get started</button><button className="text-button" onClick={() => navigation.current?.(1)}>Explore AEGIS</button></div>
               </div>
             </section>
             <section className="landing-slide landing-details" data-index="1" aria-labelledby="details-title">
               <div className="slide-content">
                 <p className="eyebrow">How it works</p>
-                <h2 id="details-title">A clearer view of your day.</h2>
+                <h2 id="details-title">Log activities. Schedule focus time.</h2>
                 <div className="feature-grid">
                   <article><span className="feature-number">01</span><h3>Understand your load</h3><p>Log notifications, app switches, replies, and form inputs. See their estimated cost in your daily decision battery.</p></article>
                   <article><span className="feature-number">02</span><h3>Protect your time</h3><p>Schedule a protect zone. Notification records are held from 15 minutes before it starts and released as one batch when it ends.</p></article>
@@ -143,10 +143,10 @@ export default function Landing({ onSignIn }) {
             <section className="landing-slide landing-finish" data-index="2" aria-labelledby="finish-title">
               <div className="slide-content">
                 <p className="eyebrow">Start with AEGIS</p>
-                <h2 id="finish-title">Give your next decision some space.</h2>
-                <p className="intro-description">A simple daily view of your load, your protected time, and the decisions that add up.</p>
+                <h2 id="finish-title">Start logging your day.</h2>
+                <p className="intro-description">Create an account to log activities and schedule your first protect zone.</p>
                 <button className="primary" onClick={onSignIn}>Start with AEGIS</button>
-                <footer className="landing-footer"><span className="brand">AEGIS</span><span>Decision load, made visible.</span></footer>
+                <footer className="landing-footer"><span className="brand">AEGIS</span><span>Daily activity tracking and focus planning.</span></footer>
               </div>
             </section>
           </div>

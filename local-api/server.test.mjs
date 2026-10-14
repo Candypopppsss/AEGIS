@@ -4,12 +4,18 @@ import { once } from 'node:events';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { createApi } from './server.mjs';
 
 async function fixture(t, options = {}) {
   let current = new Date('2026-10-11T09:00:00Z');
-  const server = createApi({ database: ':memory:', now: () => current, ...options });
+  let storage;
+  if (process.env.AEGIS_TEST_STORAGE === 'cloud') {
+    const { createCloudStorage } = await import('./cloud-storage.mjs');
+    storage = createCloudStorage({ url: options.database ? pathToFileURL(options.database).href : 'file::memory:' });
+  }
+  const server = createApi({ database: ':memory:', storage, now: () => current, ...options });
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   t.after(() => new Promise(resolve => server.close(resolve)));
@@ -139,12 +145,13 @@ test('invalid input, SQL-like email input, and untrusted origins are rejected', 
 });
 
 test('accounts and events survive restart, and passwords are not stored in plain text', async t => {
-  const directory = mkdtempSync(join(tmpdir(), 'judgment-api-'));
+  const temporaryRoot = process.env.AEGIS_TEST_DIRECTORY || tmpdir();
+  const directory = mkdtempSync(join(temporaryRoot, 'judgment-api-'));
   const database = join(directory, 'test.sqlite');
-  t.after(() => {
-    assert.equal(dirname(resolve(directory)), resolve(tmpdir()));
+  if (!process.env.AEGIS_TEST_DIRECTORY) t.after(() => {
+    assert.equal(dirname(resolve(directory)), resolve(temporaryRoot));
     assert.ok(basename(directory).startsWith('judgment-api-'));
-    rmSync(directory, { recursive: true });
+    rmSync(directory, { recursive: true, maxRetries: 10, retryDelay: 100 });
   });
   const first = await fixture(t, { database });
   const token = await first.register();

@@ -1,8 +1,12 @@
 {
   "name": "aegis-project",
   "private": true,
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
+    "check:repo": "node scripts/check-repo.mjs",
+    "test:repo": "node --test scripts/check-repo.test.mjs",
     "start:api": "node local-api/server.mjs",
     "start:production": "node scripts/serve.mjs",
     "build": "npm --prefix frontend run build",
@@ -10,7 +14,11 @@
     "publish:public": "node scripts/publish.mjs",
     "start:web": "npm --prefix frontend run dev",
     "test:local": "node --test local-api/server.test.mjs",
+    "test:cloud": "node scripts/test-cloud.mjs",
     "test:ui": "npm --prefix frontend test",
     "test:live": "npm --prefix frontend run test:live"
+  },
+  "dependencies": {
+    "@libsql/client": "0.18.0"
   }
 }
