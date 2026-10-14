@@ -60,3 +60,8 @@ npm run build
 Browser tests require Chromium and a running app. See the
 [development guide](docs/development.md) for browser tests, Docker, deployment,
 and API routes.
+
+Local environment files, credentials, session keys, and databases are excluded
+from Git and deployment uploads. Configure production secrets in Vercel's
+environment settings. CI checks the full Git history for private files and
+recognized credential patterns.

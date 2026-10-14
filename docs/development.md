@@ -51,7 +51,13 @@ Removing that volume deletes local accounts.
 `npm run deploy` builds the local containers, runs the live browser test, and
 checks that accounts, sessions, and events survive an API restart. This is also
 run in GitHub Actions. Docker must be running and Chromium must be installed.
-Optional local settings are listed in [`.env.docker.example`](../.env.docker.example).
+Optional local settings belong in an ignored `.env` file:
+
+| Variable | Default |
+| --- | --- |
+| `WEB_BIND` | `127.0.0.1` |
+| `WEB_PORT` | `8081` |
+| `FRONTEND_ORIGIN` | `http://localhost:8081,http://127.0.0.1:8081` |
 
 ## Production
 
@@ -68,8 +74,7 @@ Configure these Vercel environment variables before deploying:
 | `SESSION_SECRET` | Stable random signing secret of at least 32 bytes |
 | `FRONTEND_ORIGIN` | Optional comma-separated custom HTTPS origins |
 
-See [`.env.vercel.example`](../.env.vercel.example) for placeholders. Keep secrets
-in deployment settings. Never put them in Git or frontend variables. Vercel's
+Keep secrets in deployment settings. Never put them in Git or frontend variables. Vercel's
 assigned origins are allowed automatically.
 
 ```sh
@@ -104,3 +109,15 @@ preparation period, and can be removed only before preparation starts.
 
 Passwords use scrypt; sessions expire after eight hours. Email verification,
 password recovery, and device integrations are not implemented.
+
+## Private files
+
+Keep `.env`, credentials, session keys, databases, logs, and deployment metadata
+outside Git. `.gitignore` excludes local private files; `.dockerignore` excludes
+them from container builds. `.vercelignore` uploads only the application files
+needed to deploy.
+
+Run `npm run check:repo -- --history` before pushing. CI runs the same check
+against the full Git history. It checks private filenames and common credential
+patterns and reports filenames only. Review staged changes as well; pattern
+checks cannot detect every secret.

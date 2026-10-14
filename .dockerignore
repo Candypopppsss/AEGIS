@@ -10,6 +10,9 @@
 **/secrets
 **/credentials
 **/credentials.json
+**/auth.json
+**/.npmrc
+**/.pypirc
 **/service-account*.json
 **/*.pem
 **/*.key

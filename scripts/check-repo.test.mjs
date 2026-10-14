@@ -57,3 +57,32 @@ test('history scan catches a private file removed from the current tree', t => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Private file in Git: \.env/);
 });
+
+test('runtime account records and deployment metadata cannot be staged', t => {
+  const { cwd, stage, check } = repository(t);
+  for (const folder of ['.runtime', '.vercel']) mkdirSync(join(cwd, folder));
+  stage('.runtime/production-verification.json', '{"password":"private-test-value"}');
+  stage('.vercel/project.json', '{"projectId":"private-project"}');
+  const result = check();
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Private file in Git: \.runtime/);
+  assert.match(result.stderr, /Private file in Git: \.vercel/);
+  assert.ok(!result.stderr.includes('private-test-value'));
+  assert.ok(!result.stderr.includes('private-project'));
+});
+
+test('JWTs, database passwords, and registry tokens are reported without their values', t => {
+  const { stage, check } = repository(t);
+  const jwt = ['eyJ' + 'a'.repeat(20), 'b'.repeat(24), 'c'.repeat(32)].join('.');
+  const database = ['postgresql', '://user:', 'private-test-password', '@host/db'].join('');
+  const registry = ['_auth', 'Token=', 'd'.repeat(32)].join('');
+  stage('config.txt', [jwt, database, registry].join('\n'));
+  const result = check();
+  assert.equal(result.status, 1);
+  for (const category of ['JWT credential', 'database URL credentials', 'package registry token']) {
+    assert.ok(result.stderr.includes(category));
+  }
+  for (const value of [jwt, database, registry, 'private-test-password']) {
+    assert.ok(!result.stderr.includes(value));
+  }
+});

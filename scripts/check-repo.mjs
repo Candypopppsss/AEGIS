@@ -8,11 +8,12 @@ const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxB
 function privatePath(path) {
   const parts = path.toLowerCase().split('/');
   const name = parts.at(-1);
-  return parts.some(part => ['.aws', '.ssh', '.codex', '.agents', 'secrets', 'credentials'].includes(part))
+  return parts.some(part => ['.aws', '.ssh', '.codex', '.agents', '.vercel', '.runtime',
+    'secrets', 'credentials', 'node_modules', 'data', 'target', 'dist'].includes(part))
     || (name === '.env' || name.startsWith('.env.')) && !name.endsWith('.example')
-    || name === '.envrc' || name === 'credentials.json'
+    || ['.envrc', 'credentials.json', 'auth.json', '.npmrc', '.pypirc'].includes(name)
     || /^service-account.*\.json$/.test(name)
-    || /\.(pem|key|p12|pfx|jks|db|sqlite|sqlite3|dump)(-.*)?$/.test(name)
+    || /\.(pem|key|p12|pfx|jks|db|sqlite|sqlite3|dump|log)(-.*)?$/.test(name)
     || /^id_(rsa|ed25519)/.test(name);
 }
 
@@ -23,6 +24,9 @@ const signatures = [
   ['GitHub token', /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})\b/],
   ['Slack token', /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/],
   ['API secret key', /\bsk-(?:proj-|ant-)?[A-Za-z0-9_-]{32,}\b/],
+  ['JWT credential', /\beyJ[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{20,}\b/],
+  ['database URL credentials', /\b(?:mysql|postgres(?:ql)?|libsql|mongodb(?:\+srv)?):\/\/[^\s/:@]+:[^\s/@]+@/i],
+  ['package registry token', /_authToken\s*=\s*(?!\$\{)[A-Za-z0-9_-]{20,}/],
 ];
 let failures = 0;
 function inspect(path, content) {
